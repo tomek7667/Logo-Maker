@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"math/rand"
 	"strings"
+	"time"
 )
 
 var borderColor color.Color
@@ -116,6 +117,7 @@ func main() {
 	fmt.Println("Success")
 	fmt.Println("Base Image:", baseImagePath)
 	fmt.Println("--------------------------------")
+	maximum := len(folders) * len(resolutions)
 	for _, folder := range folders {
 		if !strings.Contains(*include, folder[0]) {
 			continue
@@ -123,21 +125,36 @@ func main() {
 		baseDir := outputDirPath + "/" + folder[0]
 		ensureDirExists(baseDir)
 		for _, res := range resolutions {
-			if !strings.Contains(res.Name, folder[0]) {
-				continue
-			}
-			imagePath := baseDir + "/" + filename + "__" + makeBaseFilename(res.Name) + ".png"
-			logo := createBaseLogoImage(res.Width, res.Height)
-			logo.SavePNG(imagePath)
-			fmt.Println(imagePath)
-			if strings.Contains(folder[0], "iPhone") {
-				icnsPath := pngToIcns(imagePath)
-				fmt.Println(icnsPath)
-			}
-			if !strings.Contains(folder[0], "iPhone") {
-				icoPath := pngToIco(imagePath)
-				fmt.Println(icoPath)
-			}
+			go func() {
+				defer func() {
+					if r := recover(); r != nil {
+						fmt.Println("Recovered from panic:", r)
+					}
+					maximum--
+				}()
+				if !strings.Contains(res.Name, folder[0]) {
+					return
+				}
+				imagePath := baseDir + "/" + filename + "__" + makeBaseFilename(res.Name) + ".png"
+				logo := createBaseLogoImage(res.Width, res.Height)
+				logo.SavePNG(imagePath)
+				fmt.Println(imagePath)
+				if strings.Contains(folder[0], "iPhone") {
+					icnsPath := pngToIcns(imagePath)
+					fmt.Println(icnsPath)
+				}
+				if !strings.Contains(folder[0], "iPhone") {
+					icoPath := pngToIco(imagePath)
+					fmt.Println(icoPath)
+				}
+			}()
+		}
+	}
+	startTime := time.Now()
+	for maximum > 0 {
+		if time.Since(startTime) > 5*time.Minute {
+			fmt.Println("Timeout")
+			break
 		}
 	}
 
