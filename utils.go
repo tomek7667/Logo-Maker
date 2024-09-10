@@ -2,6 +2,9 @@ package main
 
 import (
 	"image/color"
+	"io"
+	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -102,4 +105,38 @@ func sanitizeOutputDirPath(path string) string {
 		path = path[:len(path)-1]
 	}
 	return path
+}
+
+func ensureFontExists(fontPath string) {
+	if _, err := os.Stat(fontPath); os.IsNotExist(err) {
+		// Font file doesn't exist, attempt to download it
+		resp, err := http.Get("https://raw.githubusercontent.com/khanhas/mnmlUI/master/%40Resources/Fonts/Product%20Sans%20Regular.ttf")
+		if err != nil {
+			log.Fatalf("Failed to fetch font: %v", err)
+		}
+		defer resp.Body.Close()
+
+		// Check if the response status is OK
+		if resp.StatusCode != http.StatusOK {
+			log.Fatalf("Failed to download font, status code: %d", resp.StatusCode)
+		}
+
+		file, err := os.Create(fontPath)
+		if err != nil {
+			log.Fatalf("Failed to create font file: %v", err)
+		}
+		defer file.Close()
+
+		// Copy the response body to the file
+		if _, err := io.Copy(file, resp.Body); err != nil {
+			log.Fatalf("Failed to write font to file: %v", err)
+		}
+	}
+}
+
+func removeFont(fontPath string) {
+	err := os.Remove(fontPath)
+	if err != nil {
+		panic(err)
+	}
 }

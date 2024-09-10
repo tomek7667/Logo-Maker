@@ -54,6 +54,8 @@ var resolutions = []Resolution{
 	{48, 48, "Android App Icon (drawable-mdpi)"},
 }
 
+var fontPath = "./product-sans.ttf"
+
 func main() {
 	defaultColor := fmt.Sprintf("#%06x", rand.Intn(0xFFFFFF+1))
 	name := flag.String("name", "", "The name (required)")
@@ -111,6 +113,7 @@ func main() {
 	}
 
 	ensureDirExists(outputDirPath)
+	ensureFontExists(fontPath)
 	baseImagePath := outputDirPath + "/" + filename + ".png"
 	logo := createBaseLogoImage(1024, 1024)
 	logo.SavePNG(baseImagePath)
@@ -157,5 +160,5 @@ func main() {
 			break
 		}
 	}
-
+	removeFont(fontPath)
 }
