@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"math/rand"
 	"strings"
-	"time"
+	"sync"
 )
 
 var borderColor color.Color
@@ -115,31 +115,32 @@ func main() {
 	ensureDirExists(outputDirPath)
 	ensureFontExists(fontPath)
 	baseImagePath := outputDirPath + "/" + filename + ".png"
-	logo := createBaseLogoImage(1024, 1024)
+	logo := createBaseLogoImage(1024, 1024, 50, 128)
 	logo.SavePNG(baseImagePath)
-	fmt.Println("Success")
+	fmt.Println("Success:", *color)
 	fmt.Println("Base Image:", baseImagePath)
 	fmt.Println("--------------------------------")
-	maximum := len(folders) * len(resolutions)
 	for _, folder := range folders {
 		if !strings.Contains(*include, folder[0]) {
 			continue
 		}
 		baseDir := outputDirPath + "/" + folder[0]
 		ensureDirExists(baseDir)
+		wg := sync.WaitGroup{}
 		for _, res := range resolutions {
+			wg.Add(1)
 			go func() {
 				defer func() {
 					if r := recover(); r != nil {
 						fmt.Println("Recovered from panic:", r)
 					}
-					maximum--
+					wg.Done()
 				}()
 				if !strings.Contains(res.Name, folder[0]) {
 					return
 				}
 				imagePath := baseDir + "/" + filename + "__" + makeBaseFilename(res.Name) + ".png"
-				logo := createBaseLogoImage(res.Width, res.Height)
+				logo := createBaseLogoImage(res.Width, res.Height, float64(res.Width)/8, float64(res.Width)/20.48)
 				logo.SavePNG(imagePath)
 				fmt.Println(imagePath)
 				if strings.Contains(folder[0], "iPhone") {
@@ -152,13 +153,10 @@ func main() {
 				}
 			}()
 		}
+		wg.Wait()
 	}
-	startTime := time.Now()
-	for maximum > 0 {
-		if time.Since(startTime) > 5*time.Minute {
-			fmt.Println("Timeout")
-			break
-		}
-	}
+	splash := drawLogoAsSplash(1179, 2556)
+	splashImagePath := outputDirPath + "/" + filename + "__splash.png"
+	splash.SavePNG(splashImagePath)
 	removeFont(fontPath)
 }
