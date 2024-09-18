@@ -1,4 +1,4 @@
-module main
+module logo-maker
 
 go 1.22.1
 
