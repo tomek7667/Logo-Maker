@@ -115,7 +115,7 @@ func main() {
 	ensureDirExists(outputDirPath)
 	ensureFontExists(fontPath)
 	baseImagePath := outputDirPath + "/" + filename + ".png"
-	logo := createBaseLogoImage(1024, 1024, 50, 128)
+	logo := createBaseLogoImage(1024, 1024)
 	logo.SavePNG(baseImagePath)
 	fmt.Println("Success:", *color)
 	fmt.Println("Base Image:", baseImagePath)
@@ -140,7 +140,7 @@ func main() {
 					return
 				}
 				imagePath := baseDir + "/" + filename + "__" + makeBaseFilename(res.Name) + ".png"
-				logo := createBaseLogoImage(res.Width, res.Height, float64(res.Width)/8, float64(res.Width)/20.48)
+				logo := createBaseLogoImage(res.Width, res.Height)
 				logo.SavePNG(imagePath)
 				fmt.Println(imagePath)
 				if strings.Contains(folder[0], "iPhone") {

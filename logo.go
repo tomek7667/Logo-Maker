@@ -6,13 +6,17 @@ import (
 	"github.com/fogleman/gg"
 )
 
-func createBaseLogoImage(W int, H int, borderRadius float64, lineWidth float64) *gg.Context {
+func createBaseLogoImage(W int, H int) *gg.Context {
+	borderRadius := float64(W) / 15.0
+	lineWidth := float64(W) / 6.5
 	// The BaseLogoImage is a 1024x1024 image with a transparent background,
 	// black font for the abbreviation, and a rounder border with a 10px width and colored
 	// with the borderColor variable. It emits a glow for a 3D effect.
 	dc := gg.NewContext(W, H)
 	dc.SetRGBA(0, 0, 0, 1)
-	dc.LoadFontFace("./product-sans.ttf", float64(H)/1.4)
+
+	fontSize := pixelToPoints(float64(H) * 0.95)
+	dc.LoadFontFace("./product-sans.ttf", fontSize)
 	middleW := float64(W / 2)
 	middleH := float64(H / 2)
 	dc.DrawStringAnchored(abbreviation, middleW, middleH, 0.5, 0.5)
@@ -27,8 +31,16 @@ func createBaseLogoImage(W int, H int, borderRadius float64, lineWidth float64) 
 	dc.Stroke()
 
 	// Background color
+	innerPaddingX := float64(W) * (20.0 / 1024.0)
+	innerPaddingY := float64(H) * (20.0 / 1024.0)
 	dc.SetColor(color.White)
-	dc.DrawRoundedRectangle(lineWidth-15, lineWidth-15, float64(W)-(lineWidth*2)+30, float64(H)-(lineWidth*2)+30, borderRadius)
+	dc.DrawRoundedRectangle(
+		lineWidth-innerPaddingX,
+		lineWidth-innerPaddingY,
+		float64(W)-(lineWidth*2)+innerPaddingX*2,
+		float64(H)-(lineWidth*2)+innerPaddingY*2,
+		borderRadius,
+	)
 	dc.Fill()
 
 	// TODO: Add Glow effect
@@ -54,10 +66,7 @@ func drawLogoAsSplash(W int, H int) *gg.Context {
 	splashDc.Fill()
 
 	// scale the logo much down
-	println("creating logo")
-	logo := createBaseLogoImage(int(W/3), int(W/3), 32, 60)
-	println("creating logo done")
-
+	logo := createBaseLogoImage(int(W/3), int(W/3))
 	x := float64(W/2) - float64(logo.Width()/2)
 	y := float64(H/2) - float64(logo.Height()/2)
 	splashDc.DrawImage(logo.Image(), int(x), int(y))

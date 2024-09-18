@@ -140,3 +140,7 @@ func removeFont(fontPath string) {
 		panic(err)
 	}
 }
+
+func pixelToPoints(pixel float64) float64 {
+	return pixel * (12.0 / 16.0)
+}
