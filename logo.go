@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/fogleman/gg"
@@ -14,9 +15,20 @@ func createBaseLogoImage(W int, H int) *gg.Context {
 	// with the borderColor variable. It emits a glow for a 3D effect.
 	dc := gg.NewContext(W, H)
 	dc.SetRGBA(0, 0, 0, 1)
+	var fontSize float64
+	if len(abbreviation) == 1 {
+		fontSize = pixelToPoints(float64(H) * 0.90)
+	} else if len(abbreviation) == 2 {
+		fontSize = pixelToPoints(float64(H) * 0.55)
+	} else {
+		fontSize = pixelToPoints(float64(H) * 0.40)
+	}
 
-	fontSize := pixelToPoints(float64(H) * 0.95)
-	dc.LoadFontFace("./product-sans.ttf", fontSize)
+	err := dc.LoadFontFace("./product-sans.ttf", fontSize)
+	if err != nil {
+		panic(fmt.Errorf("failed to load/download font 'product-sans.ttf'. Make sure you have internet connection. %v", err))
+	}
+
 	middleW := float64(W / 2)
 	middleH := float64(H / 2)
 	dc.DrawStringAnchored(abbreviation, middleW, middleH, 0.5, 0.5)
