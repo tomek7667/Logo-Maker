@@ -1,4 +1,4 @@
-module logo-maker
+module github.com/tomek7667/Logo-Maker/v2
 
 go 1.22
 
